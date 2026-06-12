@@ -1,0 +1,4 @@
+# Ensure ProVerif models use LF line endings on all platforms.
+formal/proverif/*.pv text eol=lf
+formal/proverif/examples/*.pv text eol=lf
+*.sh text eol=lf

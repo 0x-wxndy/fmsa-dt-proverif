@@ -1,0 +1,53 @@
+Process 0 (that is, the initial process):
+(
+    {1}event publish(m);
+    {2}out(mqtt, ske_enc(m,k))
+) | (
+    {3}in(mqtt, ct: bitstring);
+    {4}let mrec: bitstring = ske_dec(ct,k) in
+    {5}event accept(mrec);
+    {6}event commit(mrec);
+    {7}event permit(device_id,mrec);
+    {8}event actuate(mrec)
+)
+
+-- Query not attacker(m[]) in process 0.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(m[])
+RESULT not attacker(m[]) is true.
+-- Query inj-event(accept(mesg)) ==> inj-event(publish(mesg)) in process 0.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(accept(mesg)) ==> inj-event(publish(mesg))
+goal reachable: b-inj-event(publish(m[]),@occ1[]) -> inj-event(accept(m[]),@occ5_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+@occ5_1 = @occ5[ct = ske_enc(m[],k[])]
+RESULT inj-event(accept(mesg)) ==> inj-event(publish(mesg)) is true.
+-- Query event(actuate(mesg)) ==> event(commit(mesg)) in process 0.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(actuate(mesg)) ==> event(commit(mesg))
+goal reachable: b-event(commit(m[])) -> event(actuate(m[]))
+RESULT event(actuate(mesg)) ==> event(commit(mesg)) is true.
+-- Query event(actuate(mesg)) ==> event(permit(device_id[],mesg)) in process 0.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(actuate(mesg)) ==> event(permit(device_id[],mesg))
+goal reachable: b-event(permit(device_id[],m[])) -> event(actuate(m[]))
+RESULT event(actuate(mesg)) ==> event(permit(device_id[],mesg)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(m[]) is true.
+
+Query inj-event(accept(mesg)) ==> inj-event(publish(mesg)) is true.
+
+Query event(actuate(mesg)) ==> event(commit(mesg)) is true.
+
+Query event(actuate(mesg)) ==> event(permit(device_id[],mesg)) is true.
+
+--------------------------------------------------------------
+

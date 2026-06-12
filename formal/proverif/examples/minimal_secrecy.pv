@@ -1,0 +1,13 @@
+(* Minimal toolchain check — symmetric encryption hides s on public c (see Blanchet manual hello-style). *)
+
+fun ske_enc(bitstring, bitstring): bitstring.
+reduc forall x: bitstring, k: bitstring; ske_dec(ske_enc(x,k), k) = x.
+
+free c: channel.
+free k: bitstring [private].
+free s: bitstring [private].
+
+query attacker(s).
+
+process
+  out(c, ske_enc(s,k)); 0

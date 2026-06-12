@@ -1,0 +1,86 @@
+(*
+  SDT pipeline — signed tuples + abstract fog (verify / ML pass / ledger events) + phase corruption.
+
+  Maps to paper intuition:
+  - (c, sigma, d, t)  ~  ciphertext, signature, device id, timestamp/window id
+  - sign/checksign     ~  ECDSA verification on packed tuple (c, d, t)
+  - senc/sdec          ~  Paillier/feature ciphertext abstracted as symmetric encryption
+  - commit/permit/actuate / ml_pass  ~  ledger + Permit + score>theta (ML as abstract guard)
+
+  After phase 0 the honest exchange finishes. Phase 1 leaks k_enc (device symmetric material)
+  to model key compromise: attacker learns m from recorded c (secrecy fails in phase 1).
+*)
+
+type skey.
+type sskey.
+type spkey.
+
+free mqtt: channel.
+free leak_ch: channel.
+free DEVICE: bitstring.
+free m: bitstring [private].
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+reduc forall x: bitstring, k: sskey; checksign(sign(x, k), spk(k)) = x.
+
+fun senc(bitstring, skey): bitstring.
+reduc forall x: bitstring, k: skey; sdec(senc(x, k), k) = x.
+
+event publish(bitstring, bitstring, bitstring, bitstring).
+event accept(bitstring, bitstring, bitstring, bitstring).
+event commit(bitstring, bitstring, bitstring, bitstring).
+event permit(bitstring, bitstring, bitstring, bitstring).
+event actuate(bitstring, bitstring, bitstring, bitstring).
+event ml_pass(bitstring).
+
+(* Secrecy of measurement m: holds in phase 0 before key leak; fails phase 1 after k_enc leaks. *)
+query attacker(m) phase 0.
+query attacker(m) phase 1.
+
+query c: bitstring, sig: bitstring, d: bitstring, t: bitstring;
+  inj-event(accept(c, sig, d, t)) ==> inj-event(publish(c, sig, d, t)).
+
+query c: bitstring, sig: bitstring, d: bitstring, t: bitstring;
+  event(actuate(c, sig, d, t)) ==> event(commit(c, sig, d, t)).
+
+query c: bitstring, sig: bitstring, d: bitstring, t: bitstring;
+  event(actuate(c, sig, d, t)) ==> event(permit(c, sig, d, t)).
+
+query c: bitstring, sig: bitstring, d: bitstring, t: bitstring;
+  event(actuate(c, sig, d, t)) ==> event(ml_pass(c)).
+
+process
+  new sk_dev: sskey;
+  new k_enc: skey;
+  let pk_sig = spk(sk_dev) in
+  new ts: bitstring;
+  let c0 = senc(m, k_enc) in
+  let pre_sig = (c0, DEVICE, ts) in
+  let sigma0 = sign(pre_sig, sk_dev) in
+  (
+    event publish(c0, sigma0, DEVICE, ts);
+    out(mqtt, (c0, sigma0, DEVICE, ts));
+    0
+  )
+  |
+  (
+    in(mqtt, (c1: bitstring, sig: bitstring, d1: bitstring, t1: bitstring));
+    let pre_v = (c1, d1, t1) in
+    if checksign(sig, pk_sig) = pre_v then
+      let mrec = sdec(c1, k_enc) in
+      event ml_pass(c1);
+      event accept(c1, sig, d1, t1);
+      event commit(c1, sig, d1, t1);
+      event permit(c1, sig, d1, t1);
+      event actuate(c1, sig, d1, t1);
+      0
+    else
+      0
+  )
+  |
+  (
+    phase 1;
+    out(leak_ch, k_enc);
+    0
+  )

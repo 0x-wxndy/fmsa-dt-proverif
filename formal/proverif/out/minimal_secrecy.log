@@ -1,0 +1,16 @@
+Process 0 (that is, the initial process):
+{1}out(c, ske_enc(s,k))
+
+-- Query not attacker(s[]) in process 0.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(s[])
+RESULT not attacker(s[]) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(s[]) is true.
+
+--------------------------------------------------------------
+

@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "FMSA-DT: ProVerif Models and Reproducibility Scripts"
+version: "1.0.0"
+date-released: "2026-06-05"
+authors:
+  - name: "FMSA-DT Authors"
+    affiliation: "TBD"
+repository-code: "https://github.com/0x-wxndy/fmsa-dt-proverif"
+url: "https://github.com/0x-wxndy/fmsa-dt-proverif"
+license: MIT
+keywords:
+  - digital-twin
+  - proverif
+  - formal-verification
+  - smart-home
+  - iot-security
+abstract: >-
+  Symbolic ProVerif models and reproduction scripts for FMSA-DT,
+  discharging properties P1-P3 (secrecy, agreement, actuation guards)
+  under a Dolev-Yao adversary. Includes minimal_secrecy.pv,
+  sdt_abstract.pv, and sdt_signed_pipeline.pv with reference logs.
+# After Zenodo archives release v1.0.0, uncomment and fill in:
+# doi: 10.5281/zenodo.XXXXXXX
+# identifiers:
+#   - type: doi
+#     value: 10.5281/zenodo.XXXXXXX

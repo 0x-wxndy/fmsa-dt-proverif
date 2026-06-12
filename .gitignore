@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# ProVerif re-runs overwrite these; reference logs are committed intentionally.
+# Uncomment the next line if you prefer not to track regenerated logs:
+# formal/proverif/out/*.log
+# formal/proverif/out/*.time_*.txt

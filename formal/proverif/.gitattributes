@@ -1,0 +1,3 @@
+# ProVerif `.pv` files must use Unix line endings (LF). If you edit on Windows and see
+# spurious "syntax error at query", run: dos2unix examples/*.pv *.pv
+*.pv text eol=lf

@@ -1,0 +1,42 @@
+(* Abstract honest device | fog on mqtt — queries must appear before process (pitype). *)
+
+fun ske_enc(bitstring, bitstring): bitstring.
+reduc forall x: bitstring, ky: bitstring; ske_dec(ske_enc(x, ky), ky) = x.
+
+free mqtt: channel.
+free k: bitstring [private].
+free m: bitstring [private].
+free device_id: bitstring.
+
+event publish(bitstring).
+event accept(bitstring).
+event commit(bitstring).
+event permit(bitstring, bitstring).
+event actuate(bitstring).
+
+query attacker(m).
+
+query mesg: bitstring; inj-event(accept(mesg)) ==> inj-event(publish(mesg)).
+
+query mesg: bitstring; event(actuate(mesg)) ==> event(commit(mesg)).
+
+query mesg: bitstring; event(actuate(mesg)) ==> event(permit(device_id, mesg)).
+
+process
+  (
+    event publish(m);
+    out(mqtt, ske_enc(m, k));
+    0
+  )
+  |
+  (
+    in(mqtt, ct: bitstring);
+    let mrec = ske_dec(ct, k) in
+    (
+      event accept(mrec);
+      event commit(mrec);
+      event permit(device_id, mrec);
+      event actuate(mrec);
+      0
+    )
+  )
