@@ -1,5 +1,7 @@
 # FMSA-DT ProVerif models
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20667653.svg)](https://doi.org/10.5281/zenodo.20667653)
+
 Symbolic ProVerif models and reproduction scripts for **FMSA-DT** (*Formal Modeling and Security Analysis of DT-enabled smart environments*).
 
 This repository archives the ProVerif encoding used to discharge properties **P1–P3** in the paper: measurement secrecy, injective device-to-fog agreement, and actuation guarded by commit / permit / ML-gate events.
@@ -66,7 +68,7 @@ The phase-1 `false` on `sdt_signed_pipeline.pv` models intentional post-compromi
 
 ## Citation
 
-If you use these models, please cite the Zenodo record (once published) or this repository:
+If you use these models, please cite the Zenodo record:
 
 ```bibtex
 @misc{fmsa-dt-proverif,
@@ -74,24 +76,14 @@ If you use these models, please cite the Zenodo record (once published) or this 
   title        = {{FMSA-DT}: {ProVerif} Models and Reproducibility Scripts},
   year         = {2026},
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.XXXXXXX},
-  url          = {https://doi.org/10.5281/zenodo.XXXXXXX},
-  note         = {Software archive, also at \url{https://github.com/0x-wxndy/fmsa-dt-proverif}}
+  doi          = {10.5281/zenodo.20667653},
+  url          = {https://doi.org/10.5281/zenodo.20667653},
+  note         = {Version v1.0.0; source also at \url{https://github.com/0x-wxndy/fmsa-dt-proverif}}
 }
 ```
-
-Replace `10.5281/zenodo.XXXXXXX` with the DOI assigned after the first GitHub release is archived on Zenodo.
 
 See also [`CITATION.cff`](CITATION.cff) for GitHub/Zenodo metadata integration.
 
 ## License
 
 MIT License — see [`LICENSE`](LICENSE).
-
-## Zenodo archive (maintainers)
-
-1. Push this repository to GitHub.
-2. Log in at [zenodo.org](https://zenodo.org) with your GitHub account.
-3. **Account → GitHub → Enable** integration for `0x-wxndy/fmsa-dt-proverif`.
-4. Create a GitHub **Release** tagged `v1.0.0` (see [`ZENODO.md`](ZENODO.md)).
-5. Zenodo mints a DOI; add it to `CITATION.cff`, this README, and the paper's `ref.bib` entry `REPO`.
