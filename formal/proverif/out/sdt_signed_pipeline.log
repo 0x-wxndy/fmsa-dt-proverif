@@ -1,2 +1,152 @@
-File "/mnt/d/SMART-BUILDING-DT/formal/proverif/sdt_signed_pipeline.pv", line 41, character 24:
-Error: Syntax error.
+Process 0 (that is, the initial process):
+{1}new sk_dev: sskey;
+{2}new k_enc: skey;
+{3}let pk_sig: spkey = spk(sk_dev) in
+{4}new ts: bitstring;
+{5}let c0: bitstring = senc(m,k_enc) in
+{6}let pre_sig: bitstring = (c0,DEVICE,ts) in
+{7}let sigma0: bitstring = sign(pre_sig,sk_dev) in
+(
+    {8}event publish(c0,sigma0,DEVICE,ts);
+    {9}out(mqtt, (c0,sigma0,DEVICE,ts))
+) | (
+    {10}in(mqtt, (c1: bitstring,sig: bitstring,d1: bitstring,t1: bitstring));
+    {11}let pre_v: bitstring = (c1,d1,t1) in
+    {12}if (checksign(sig,pk_sig) = pre_v) then
+    {13}let mrec: bitstring = sdec(c1,k_enc) in
+    {14}event ml_pass(c1);
+    {15}event accept(c1,sig,d1,t1);
+    {16}event commit(c1,sig,d1,t1);
+    {17}event permit(c1,sig,d1,t1);
+    {18}event actuate(c1,sig,d1,t1)
+) | (
+    {19}phase 1;
+    {20}out(leak_ch, k_enc)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new sk_dev: sskey;
+{2}new k_enc: skey;
+{4}new ts: bitstring;
+(
+    {5}let c0: bitstring = senc(m,k_enc) in
+    {6}let pre_sig: bitstring = (c0,DEVICE,ts) in
+    {7}let sigma0: bitstring = sign(pre_sig,sk_dev) in
+    {8}event publish(c0,sigma0,DEVICE,ts);
+    {9}out(mqtt, (c0,sigma0,DEVICE,ts))
+) | (
+    {10}in(mqtt, (c1: bitstring,sig: bitstring,d1: bitstring,t1: bitstring));
+    {11}let pre_v: bitstring = (c1,d1,t1) in
+    {3}let pk_sig: spkey = spk(sk_dev) in
+    {12}if (checksign(sig,pk_sig) = pre_v) then
+    {13}let mrec: bitstring = sdec(c1,k_enc) in
+    {14}event ml_pass(c1);
+    {15}event accept(c1,sig,d1,t1);
+    {16}event commit(c1,sig,d1,t1);
+    {17}event permit(c1,sig,d1,t1);
+    {18}event actuate(c1,sig,d1,t1)
+) | (
+    {19}phase 1;
+    {20}out(leak_ch, k_enc)
+)
+
+-- Query not attacker(m[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(m[])
+RESULT not attacker(m[]) is true.
+-- Query not attacker_p1(m[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker_p1(m[])
+goal reachable: attacker_p1(m[])
+
+Derivation:
+
+1. The message k_enc[] may be sent to the attacker in phase 1 at output {20}.
+attacker_p1(k_enc[]).
+
+2. The message (senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]) may be sent to the attacker at output {9}.
+attacker((senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[])).
+
+3. By 2, the attacker may know (senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]).
+Using the function 1-proj-4-tuple the attacker may obtain senc(m[],k_enc[]).
+attacker(senc(m[],k_enc[])).
+
+4. By 3, the attacker may know senc(m[],k_enc[]).
+So the attacker may know senc(m[],k_enc[]) in phase 1.
+attacker_p1(senc(m[],k_enc[])).
+
+5. By 4, the attacker may know senc(m[],k_enc[]) in phase 1.
+By 1, the attacker may know k_enc[] in phase 1.
+Using the function sdec the attacker may obtain m[] in phase 1.
+attacker_p1(m[]).
+
+6. By 5, attacker_p1(m[]).
+The goal is reached, represented in the following fact:
+attacker_p1(m[]).
+
+
+A more detailed output of the traces is available with
+  set traceDisplay = long.
+
+new sk_dev: sskey creating sk_dev_1 at {1}
+
+new k_enc: skey creating k_enc_1 at {2}
+
+new ts: bitstring creating ts_1 at {4}
+
+event publish(senc(m,k_enc_1),sign((senc(m,k_enc_1),DEVICE,ts_1),sk_dev_1),DEVICE,ts_1) at {8}
+
+out(mqtt, (~M,~M_1,~M_2,~M_3)) with ~M = senc(m,k_enc_1), ~M_1 = sign((senc(m,k_enc_1),DEVICE,ts_1),sk_dev_1), ~M_2 = DEVICE, ~M_3 = ts_1 at {9}
+
+out(leak_ch, ~M_4) with ~M_4 = k_enc_1 at {20}
+
+The attacker has the message sdec(~M,~M_4) = m in phase 1.
+A trace has been found.
+RESULT not attacker_p1(m[]) is false.
+-- Query inj-event(accept(c,sig_1,d,t)) ==> inj-event(publish(c,sig_1,d,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(accept(c,sig_1,d,t)) ==> inj-event(publish(c,sig_1,d,t))
+goal reachable: b-inj-event(publish(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]),@occ8[]) -> inj-event(accept(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]),@occ15_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+@occ15_1 = @occ15[t1 = ts[],d1 = DEVICE[],sig = sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),c1 = senc(m[],k_enc[])]
+RESULT inj-event(accept(c,sig_1,d,t)) ==> inj-event(publish(c,sig_1,d,t)) is true.
+-- Query event(actuate(c,sig_1,d,t)) ==> event(commit(c,sig_1,d,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(actuate(c,sig_1,d,t)) ==> event(commit(c,sig_1,d,t))
+goal reachable: b-event(commit(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[])) -> event(actuate(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]))
+RESULT event(actuate(c,sig_1,d,t)) ==> event(commit(c,sig_1,d,t)) is true.
+-- Query event(actuate(c,sig_1,d,t)) ==> event(permit(c,sig_1,d,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(actuate(c,sig_1,d,t)) ==> event(permit(c,sig_1,d,t))
+goal reachable: b-event(permit(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[])) -> event(actuate(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]))
+RESULT event(actuate(c,sig_1,d,t)) ==> event(permit(c,sig_1,d,t)) is true.
+-- Query event(actuate(c,sig_1,d,t)) ==> event(ml_pass(c)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(actuate(c,sig_1,d,t)) ==> event(ml_pass(c))
+goal reachable: b-event(ml_pass(senc(m[],k_enc[]))) -> event(actuate(senc(m[],k_enc[]),sign((senc(m[],k_enc[]),DEVICE[],ts[]),sk_dev[]),DEVICE[],ts[]))
+RESULT event(actuate(c,sig_1,d,t)) ==> event(ml_pass(c)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(m[]) is true.
+
+Query not attacker_p1(m[]) is false.
+
+Query inj-event(accept(c,sig_1,d,t)) ==> inj-event(publish(c,sig_1,d,t)) is true.
+
+Query event(actuate(c,sig_1,d,t)) ==> event(commit(c,sig_1,d,t)) is true.
+
+Query event(actuate(c,sig_1,d,t)) ==> event(permit(c,sig_1,d,t)) is true.
+
+Query event(actuate(c,sig_1,d,t)) ==> event(ml_pass(c)) is true.
+
+--------------------------------------------------------------
+
